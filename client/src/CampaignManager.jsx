@@ -1,5 +1,6 @@
-﻿import { useState } from 'react'
+﻿import { useState, useEffect } from 'react'
 import EncounterCreationWindow from './EncounterCreationWindow'
+import Encounter from './Encounter'
 
 // Displays campaigns and their characters, inventories, and equipment controls.
 export default function CampaignManager({
@@ -11,12 +12,21 @@ export default function CampaignManager({
   disabled,
   onChange,
   onEquip,
-  onCreateEncounter
 }) {
 
+  const [encounterName, setEncounterName] = useState('')
+  const [enemyId, setEnemyId] = useState('')
+  const [characterId, setCharacterId] = useState('')
+  const [lootItemId, setLootItemId] = useState()
+  const [lootTableItems, setLootTableItems] = useState([])
+
+  const [encounterCharacter, setEncounterCharacter] = useState()
+  const [selectedEncounter, setSelectedEncounter] = useState()
+  const [localEncounters, setLocalEncounters] = useState(encounters)
 
   const [selected, setSelected] = useState('')
   const [name, setName] = useState('')
+
   const campaign =
     campaigns.find((entry) => entry.id === selected) || campaigns[0]
   // Creates a campaign, selects it, clears the name after a successful save.
@@ -27,6 +37,14 @@ export default function CampaignManager({
       setSelected(savedCampaign.id)
       setName('')
     }
+  }
+
+  async function addToLootTable() {
+    console.log(items)
+    console.log(lootItemId)
+    const item = items.find((entry) => entry.id === lootItemId)
+    setLootTableItems([...lootTableItems, item])
+    console.log(lootTableItems)
   }
 
   // Adds a copy of the selected starting character to the active campaign.
@@ -47,6 +65,14 @@ export default function CampaignManager({
     })
   }
 
+  function changeCharacterCurrentHPEncounter(currHp, characterId) {
+    return onChange('/campaigns/character/hp', {
+      campaignId: campaign.id,
+      characterId,
+      currHp
+    })
+  }
+
   function addInventoryItemEncounter(itemId, characterId) {
     return onChange('/campaigns/inventory/add', {
       campaignId: campaign.id,
@@ -62,6 +88,16 @@ export default function CampaignManager({
       characterId,
       itemId
     })
+  }
+
+  async function createEncounter(event) {
+    event.preventDefault()
+
+    return onChange('/campaigns/encounters/add', {
+        name: encounterName,
+        lootTableItems: lootTableItems,
+        enemyId
+      })
   }
 
   function equipItem(itemId, characterId, campaignId) {
@@ -226,19 +262,169 @@ export default function CampaignManager({
               </ul>
             </article>
           ))}
-          <EncounterCreationWindow
-            enemies={enemies}
-            items={items}
-            characters={campaign.characters}
-            encounters={encounters.filter((entry) => entry.campaignId === campaign.id)}
-            disabled={disabled}
-            onCreate={(configuration) => onCreateEncounter({
-              ...configuration,
-              campaignId: campaign.id
-            })}
-          />
         </>
       )}
+      <section className="card p-3 p-md-4 mt-4" aria-labelledby="encounter-creation-heading">
+        <h2 id="encounter-creation-heading" className="h3">Create Encounter</h2>
+        <p>Configure an encounter by selecting a campaign character, enemy, and available loot.</p>
+        <form className="d-flex flex-wrap gap-2 mb-3" onSubmit={(event) => createEncounter(event)}>
+          <div className="col-12">
+            <label className="form-label" htmlFor="encounter-name">Encounter name</label>
+            <input
+                id="encounter-name"
+                className="form-control"
+                required
+                maxLength={100}
+                disabled={disabled}
+                value={encounterName}
+                onChange={(event) => setEncounterName(event.target.value)}
+            />
+          </div>
+          <div className="col-md-4">
+            <label className="form-label" htmlFor="encounter-enemy">Enemy</label>
+            <select
+                id="encounter-enemy"
+                className="form-select"
+                required
+                disabled={disabled}
+                value={enemyId}
+                onChange={(event) => setEnemyId(event.target.value)}
+            >
+              <option value="">Choose an enemy</option>
+              {enemies.map((enemy) => (
+                  <option key={enemy.id} value={enemy.id}>{enemy.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-select mb-3">
+            <label className="form-label" htmlFor="encounter-loot">Loot (item templates)</label>
+            <select
+                id="encounter-loot"
+                className="form-select"
+                required
+                disabled={disabled}
+                defaultValue=""
+                onChange={() => setLootItemId(event.target.value)}
+            >
+              <option value="" disabled>
+                Choose an item template
+              </option>
+              {items.map((item) => (
+                  <option key={item.id} value={item.id}>{item.name}</option>
+              ))}
+            </select>
+            {items.length === 0 && <small className="form-text">Create item templates first.</small>}
+            <button
+                type="button"
+                className="btn btn-sm btn-outline-primary"
+                disabled={disabled}
+                onClick={() => {
+                    lootItemId?
+                    addToLootTable() : null;
+                  }
+                }
+            >Add to encounter loot</button>
+              <ul className="list-group">
+                {lootTableItems.map((item, index) => (
+                    <li className="list-group-item" key={item.id}>
+                      <strong>
+                        {item.name} (copy {index + 1})
+                      </strong>{' '}
+                      <p>{item.description}</p>
+                      <p>
+                        Modifier: {item.modifierType} +{item.modifier}
+                      </p>
+                      <button
+                          type="button"
+                          className="btn btn-sm btn-outline-danger"
+                          disabled={disabled}
+                          onClick={() => lootTableItems((prev) => prev.filter((_, i) => i !== index))}
+                      >
+                        Remove {item.name} (copy {index + 1})
+                      </button>
+                    </li>
+                ))}
+              </ul>
+          </div>
+          <button className="btn btn-sm btn-outline-primary">Add Encounter</button>
+        </form>
+      </section>
+      <section className="card p-3 p-md-4 mt-4" aria-labelledby="encounter-playing-heading">
+        <h2 id="encounter-playing-heading" className="h3">Play Encounter</h2>
+        <p>Select an Encounter to play</p>
+        <select
+            id="encounters"
+            className="form-select"
+            required
+            disabled={disabled}
+            defaultValue=""
+            onChange={(event) =>setSelectedEncounter(encounters.find((e) => {
+              return e.id === event.target.value;
+            }))}
+        >
+          <option value="" disabled>
+            Choose an encounter
+          </option>
+          {encounters.map((encounter) => (
+              <option key={encounter.id} value={encounter.id}>{encounter.name}</option>
+          ))}
+        </select>
+        <h2 id="encounter-playing-heading" className="h3">Select Player Character</h2>
+        <p>Select an Character to play in this encounter</p>
+        <select
+            id="playerCharacters"
+            className="form-select"
+            required
+            disabled={disabled}
+            defaultValue=""
+            onChange={() => setEncounterCharacter(campaign.characters.find((c) => {
+              return c.id === event.target.value;
+            }))}
+        >
+          <option value="" disabled>
+            Choose an Character
+          </option>
+          {!campaign ? (
+              <option value="" disabled>Placeholder</option>
+          ) : (
+              campaign.characters.map((character) => (
+                  <option key={character.id} value={character.id}>{character.profile.name}</option>
+              )
+          ))}
+        </select>
+        {(() => {
+          if (!campaign && selectedEncounter !== undefined && encounterCharacterId !== undefined) {
+            console.log("=== Encounter Debug ===", {
+              name: selectedEncounter?.name,
+              localLootTable: selectedEncounter?.lootTableItems,
+              Character: encounterCharacter,
+              Enemy: enemies?.find(
+                  (enemy) => enemy.id === selectedEncounter?.enemyId
+              ),
+              addItem: addInventoryItemEncounter,
+              saveCharacterHpToCampaign: changeCharacterCurrentHPEncounter,
+              campaignId: selected,
+            });
+          }
+
+          return null;
+        })()}
+        {!campaign || selectedEncounter === undefined || encounterCharacter === undefined ? (
+            <p>Select an encounter and a character to begin encounter</p>
+        ) : (
+          <Encounter
+            name={selectedEncounter.name}
+            localLootTable={selectedEncounter.lootTableItems}
+            Character={encounterCharacter}
+            Enemy={enemies.find((enemy) => {
+              return enemy.id === selectedEncounter.enemyId;
+            })}
+            addItem={addInventoryItemEncounter}
+            saveCharacterHpToCampaign={changeCharacterCurrentHPEncounter}
+            campaignId={selected}
+          />
+        )}
+      </section>
     </section>
   )
 }

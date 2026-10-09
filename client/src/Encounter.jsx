@@ -3,17 +3,18 @@ import React from 'react';
 export default class Encounter extends React.Component {
     constructor(props) {
         super(props);
+        console.log(props)
         this.state = {
             // this is a list of items
             name: props.name,
             localLootTable: props.lootTable,
-            Character : null,
-            LocalEquippedItem : null,
-            Enemy: props.enemy,
-            enemyHp: Math.floor((props.enemy.maxHp - props.enemy.minHp) * Math.random() + 1) + props.enemy.minHp,
+            Character : props.Character,
+            Enemy: props.Enemy,
+            enemyHp: Math.floor((props.Enemy.maxHp - props.Enemy.minHp) * Math.random() + 1) + props.Enemy.minHp,
             addItem: props.addItem,
             isDefending: false,
-            saveCharacterToCampaign: props.saveCharacterToCampaign,
+            saveCharacterHpToCampaign: props.saveCharacterHpToCampaign,
+            campaignId: props.campaignId,
         };
         this.turnInProgress = false;
     }
@@ -108,46 +109,37 @@ export default class Encounter extends React.Component {
         this.turnInProgress = true;
         try {
             await this[action]();
-            if (!this.enemyDefeated()) await this.attackFromEnemy();
+            if (!this.enemyDefeated()){
+                await this.attackFromEnemy();
+            }else{
+                this.state.saveCharacterToCampaign(this.state.Character.currHp, this.state.campaignId);
+                this.getDrop();
+            }
         } finally {
             this.turnInProgress = false;
         }
     }
 
-    returnRenderables = () => {
-        const { Character, Enemy, enemyHp } = this.state;
-        return {
-            character: Character
-                ? { currHp: Character.currHp, maxHp: Character.maxHp }
-                : null,
-            enemy: Enemy
-                ? { currHp: enemyHp, maxHp: Enemy.maxHp }
-                : null
-        };
-    }
-
     render() {
-        // boilerplate from jsx example
-        return (
+        return (<article>
+            <h1>Encounter: {this.state.name}</h1>
             <article>
-                <h1>Encounter: {this.state.name}</h1>
-                <article>
-                    <h3>Enemy: {this.state.Enemy.name}</h3>
-                    <p>HP: {this.state.enemyHp}</p>
-                </article>
-                <article>
-                    <h3>Character: {this.state.Character.profile.name}</h3>
-                    <p>HP: {this.state.Character.currHp}/{this.state.Character.baseMaxHp}</p>
-                    <button
-                        type="button"
-                        onClick={turnAction('attack')}
-                    >Attack</button>
-                    <button
-                        type="button"
-                        onClick={turnAction('defend')}
-                    >Defend</button>
-                </article>
+                <h3>Enemy: {this.state.Enemy.name}</h3>
+                <p>HP: {this.state.enemyHp}</p>
             </article>
-        );
+            <article>
+                {console.log("Char: "+this.state.Character)}
+                <h3>Character: {this.state.Character.name}</h3>
+                <p>HP: {this.state.Character.currHp}/{this.state.Character.baseMaxHp}</p>
+                <button
+                    type="button"
+                    onClick={this.turnAction('attack')}
+                >Attack</button>
+                <button
+                    type="button"
+                    onClick={this.turnAction('defend')}
+                >Defend</button>
+            </article>
+        </article>)
     }
 }

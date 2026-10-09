@@ -86,6 +86,7 @@ export default function Tracker({
       setItems(await api.get('/items'))
       setEnemies(await api.get('/enemies'))
       if (campaignPage) setCampaigns(await api.get('/campaigns'))
+      if (encounters) setEncounters(await api.get('/campaigns/encounters'))
       setLoaded(true)
 
       setStatus(

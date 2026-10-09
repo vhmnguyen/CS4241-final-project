@@ -2,6 +2,7 @@
 
 function registerCampaigns(app, db, requireJsonObject) {
   const campaigns = db.collection('campaigns')
+  const encounters = db.collection('encounters')
   const throwRequestError = (message, status = 400) => {
     throw Object.assign(new Error(message), { status })
   }
@@ -23,6 +24,8 @@ function registerCampaigns(app, db, requireJsonObject) {
 
     response.json(ownedCampaigns.map(toPublicCampaign))
   })
+
+
 
   app.post('/campaigns/add', requireJsonObject, async (request, response) => {
     const name =
@@ -62,41 +65,83 @@ function registerCampaigns(app, db, requireJsonObject) {
     )
   }
 
-  app.post('/campaigns/join', requireJsonObject, async (request, response) =>
-    updateCampaign(request, response, async (campaign) => {
-      const characterId = parseObjectId(request.body.characterId).toHexString()
-      if (
-        campaign.characters.some(
-          (character) => character.sourceCharacterId === characterId
-        )
-      )
-        throwRequestError('Character already joined this campaign.')
-      if (campaign.characters.length >= 20)
-        throwRequestError('A campaign can contain at most 20 characters.')
-      const source = await db
-        .collection('characters')
-        .findOne({ _id: parseObjectId(characterId), ownerId: request.user._id })
-      if (!source) throwRequestError('Character not found.', 404)
-      const {
-        name,
-        class: characterClass,
-        species,
-        level,
-        currHp,
-        maxHp
-      } = source
-      campaign.characters.push({
-        id: new ObjectId().toHexString(),
-        sourceCharacterId: characterId,
-        profile: { name, class: characterClass, species, level, maxHp },
-        level,
-        currHp,
-        baseMaxHp: maxHp,
-        inventory: [],
-        equippedItemId: null
-      })
+    app.post('/campaigns/character/hp', requireJsonObject, async (request, response) => {
+        const { campaignId, characterId, currHp } = request.body;
+        const campaign = await campaigns.findOne({ id: campaignId });
+        characters = campaign.characters.map(character =>
+            character.id === characterId ? { ...character, currHp: currHp } : character
+        );
+        if (!campaign) {
+            db.users.replaceOne(
+                { id: campaignId },
+                { ...campaign, characters: characters }
+            );
+        }
     })
-  )
+
+    app.post('/campaigns/join', requireJsonObject, async (request, response) =>
+        updateCampaign(request, response, async (campaign) => {
+            const characterId = parseObjectId(request.body.characterId).toHexString()
+            if (
+                campaign.characters.some(
+                    (character) => character.sourceCharacterId === characterId
+                )
+            )
+                throwRequestError('Character already joined this campaign.')
+            if (campaign.characters.length >= 20)
+                throwRequestError('A campaign can contain at most 20 characters.')
+            const source = await db
+                .collection('characters')
+                .findOne({ _id: parseObjectId(characterId), ownerId: request.user._id })
+            if (!source) throwRequestError('Character not found.', 404)
+            const {
+                name,
+                class: characterClass,
+                species,
+                level,
+                currHp,
+                maxHp
+            } = source
+            campaign.characters.push({
+                id: new ObjectId().toHexString(),
+                sourceCharacterId: characterId,
+                profile: { name, class: characterClass, species, level, maxHp },
+                level,
+                currHp,
+                baseMaxHp: maxHp,
+                inventory: [],
+                equippedItemId: null
+            })
+        })
+    )
+
+    app.post('/campaigns/encounters/add', requireJsonObject, async (request, response) => {
+        const { name, enemyId, lootTableItems } = request.body;
+
+            const encounter = {
+                ownerId: request.user._id,
+                name,
+                enemyId,
+                lootTableItems
+            }
+
+            const result = await encounters.insertOne(encounter)
+
+            response.status(201).json({
+                message: 'Encounter created successfully',
+                id: result.insertedId.toHexString()
+            })
+        }
+    )
+
+    app.get('/campaigns/encounters', async (request, response) => {
+        const ownedEncounters = await encounters
+            .find({ ownerId: request.user._id })
+            .sort({ _id: 1 })
+            .toArray()
+
+        response.json(ownedEncounters.map(toPublicCampaign))
+    })
 
   function findCampaignCharacter(campaign, value) {
     const campaignCharacter = campaign.characters.find(
@@ -197,7 +242,10 @@ function registerCampaigns(app, db, requireJsonObject) {
       '/campaigns/join',
       '/campaigns/inventory/add',
       '/campaigns/inventory/remove',
-      '/campaigns/equip'
+      '/campaigns/equip',
+      '/campaigns/encounters',
+      '/campaigns/encounters/add',
+      '/campaigns/character/hp'
     ],
     (request, response) =>
       response.status(405).json({ error: 'Method not allowed.' })
