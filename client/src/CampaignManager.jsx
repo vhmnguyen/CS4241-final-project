@@ -20,8 +20,8 @@ export default function CampaignManager({
   const [lootItemId, setLootItemId] = useState()
   const [lootTableItems, setLootTableItems] = useState([])
 
-  const [encounterCharacter, setEncounterCharacter] = useState()
-  const [selectedEncounter, setSelectedEncounter] = useState()
+  const [encounterCharacter, setEncounterCharacter] = useState("")
+  const [selectedEncounter, setSelectedEncounter] = useState("")
   const [localEncounters, setLocalEncounters] = useState(encounters)
 
   const [selected, setSelected] = useState('')
@@ -66,8 +66,8 @@ export default function CampaignManager({
   }
 
   function resetEncounterSelections() {
-    setSelectedEncounter(null);
-    setEncounterCharacter(null);
+    setSelectedEncounter("");
+    setEncounterCharacter("");
   }
 
   function changeCharacterCurrentHPEncounter(currHp, characterId) {
@@ -363,7 +363,7 @@ export default function CampaignManager({
             className="form-select"
             required
             disabled={disabled}
-            defaultValue=""
+            defaultValue={selectedEncounter || ""}
             onChange={(event) =>setSelectedEncounter(encounters.find((e) => {
               return e.id === event.target.value;
             }))}
@@ -382,7 +382,7 @@ export default function CampaignManager({
             className="form-select"
             required
             disabled={disabled}
-            defaultValue=""
+            defaultValue={encounterCharacter || ""}
             onChange={() => setEncounterCharacter(campaign.characters.find((c) => {
               return c.id === event.target.value;
             }))}
@@ -398,7 +398,7 @@ export default function CampaignManager({
               )
           ))}
         </select>
-        {!campaign || selectedEncounter === undefined || encounterCharacter === undefined ? (
+        {!campaign || selectedEncounter === "" || encounterCharacter === "" ? (
             <p>Select an encounter and a character to begin encounter</p>
         ) : (
           <Encounter
