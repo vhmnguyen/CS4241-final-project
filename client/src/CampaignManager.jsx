@@ -1,13 +1,17 @@
 ﻿import { useState } from 'react'
+import EncounterCreationWindow from './EncounterCreationWindow'
 
 // Displays campaigns and their characters, inventories, and equipment controls.
 export default function CampaignManager({
   campaigns,
   characters,
   items,
+  enemies,
+  encounters,
   disabled,
   onChange,
-  onEquip
+  onEquip,
+  onCreateEncounter
 }) {
 
 
@@ -222,6 +226,17 @@ export default function CampaignManager({
               </ul>
             </article>
           ))}
+          <EncounterCreationWindow
+            enemies={enemies}
+            items={items}
+            characters={campaign.characters}
+            encounters={encounters.filter((entry) => entry.campaignId === campaign.id)}
+            disabled={disabled}
+            onCreate={(configuration) => onCreateEncounter({
+              ...configuration,
+              campaignId: campaign.id
+            })}
+          />
         </>
       )}
     </section>

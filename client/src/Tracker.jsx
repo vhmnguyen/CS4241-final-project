@@ -14,6 +14,7 @@ export default function Tracker({
   const [characters, setCharacters] = useState([])
   const [items, setItems] = useState([])
   const [enemies, setEnemies] = useState([])
+  const [encounters, setEncounters] = useState([])
   const [campaigns, setCampaigns] = useState([])
   const [draft, setDraft] = useState(emptyCharacter)
   const [editing, setEditing] = useState(null)
@@ -83,8 +84,8 @@ export default function Tracker({
       setCharacters(await api.get('/data'))
 
       setItems(await api.get('/items'))
+      setEnemies(await api.get('/enemies'))
       if (campaignPage) setCampaigns(await api.get('/campaigns'))
-      else setEnemies(await api.get('/enemies'))
       setLoaded(true)
 
       setStatus(
@@ -348,6 +349,16 @@ export default function Tracker({
     }
   }
 
+  function createEncounter(configuration) {
+    setEncounters((current) => [
+      ...current,
+      {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        ...configuration
+      }
+    ])
+  }
+
   function adjustHp(character, direction) {
     if (requestPending.current) return
 
@@ -449,9 +460,12 @@ export default function Tracker({
               campaigns={campaigns}
               characters={characters}
               items={items}
+              enemies={enemies}
+              encounters={encounters}
               disabled={disabled}
               onChange={mutateCampaign}
               onEquip={equipItem}
+              onCreateEncounter={createEncounter}
             />
           ) : (
             <>
