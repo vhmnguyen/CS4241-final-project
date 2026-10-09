@@ -65,6 +65,11 @@ export default function CampaignManager({
     })
   }
 
+  function resetEncounterSelections() {
+    setSelectedEncounter(null);
+    setEncounterCharacter(null);
+  }
+
   function changeCharacterCurrentHPEncounter(currHp, characterId) {
     //campaign = campaign.characters.map((entry) => (entry.id === characterId)? {...entry, currHp: currHp} : entry);
     return onChange('/campaigns/character/hp', {
@@ -406,6 +411,7 @@ export default function CampaignManager({
             addItem={addInventoryItemEncounter}
             saveCharacterHpToCampaign={changeCharacterCurrentHPEncounter}
             campaignId={selected}
+            reset={resetEncounterSelections}
           />
         )}
       </section>

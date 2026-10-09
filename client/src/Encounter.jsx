@@ -15,6 +15,7 @@ export default class Encounter extends React.Component {
             isDefending: false,
             saveCharacterHpToCampaign: props.saveCharacterHpToCampaign,
             campaignId: props.campaignId,
+            reset: props.reset,
         };
         this.turnInProgress = false;
     }
@@ -116,6 +117,7 @@ export default class Encounter extends React.Component {
             }else{
                 this.state.saveCharacterHpToCampaign(this.state.Character.currHp, this.state.Character.id);
                 this.getDrop();
+                this.state.reset();
             }
         } finally {
             this.turnInProgress = false;
