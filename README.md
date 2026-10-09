@@ -1,49 +1,42 @@
 # Final Project
-*Due October 9th by 1:59 PM*
 
-For your final project, you'll implement a web application that exhibits understanding of the course materials. 
-This project should provide an opportunity to both be creative and to pursue individual research and learning goals.
+**Members:** Vu Nguyen, Wen Chen, Shubham Kumar
 
-## General description
-Your project should consist of a complete Web application, exhibiting facets of the three main sections of the course material:
+**Website:** https://cs4241-final-project-6iq7.onrender.com
 
-- Static web page content and design. You should have a project that is accessible, easily navigable, and features significant content.
-- Dynamic behavior implemented with JavaScript (TypeScript is also allowed if your group wants to explore it).
-- Server-side programming *using Node.js*. Typically this will take the form of some sort of persistent data (database), authentication, and possibly server-side computation.
-- A video (less than five minutes) where each group member explains some aspect of the project. An easy way to produce this video is for you all the groups members to join a Zoom call that is recorded; each member can share their screen when they discuss the project or one member can "drive" the interface while other members narrate (this second option will probably work better.) The video should be posted on YouTube or some other accessible video hosting service. Make sure your video is less than five minutes, but long enough to successfully  explain your project and show it in action. There is no minimum video length.
+**Video:** https://www.youtube.com/watch?v=w1D1-W9-Eig&feature=youtu.be
 
-## Project ideation
-Excellent projects typically serve someone/some group; for this assignment you need to define your users and stakeholders. I encourage you to identify projects that will have impact, either artistically, politically, or in terms of productivity. 
+## Description
 
-### Deliverables
+D&D Simplified is a web application inspired by Dungeons & Dragons. Players can create an account and build custom characters, enemies, and items. Characters have a class, species, level, and hit points, while enemies have configurable health and damage ranges. Item modifiers support combat effects such as increased damage, damage reduction, and healing.
 
-#### Form Team (due 9/11)
-Students are will work in teams of 3-5 students for the project; teams of two can be approved with the permission of the instructor. Working in teams should help enable you to build a good project in a limited amount of time.  Use the `#project-logistics` channel in Discord to pitch ideas for final projects and/or find fellow team members as needed.
+The application also includes campaign management and an encounter builder. Campaigns maintain separate character inventories, allowing players to carry multiple items and equip one at a time. Players can create encounters using custom enemies and loot selections, then choose a character to participate. Combat includes attack and defend actions, randomized damage, and health tracking.
 
-Teams must be in place by end of day on Friday, September 11th. If you have not identified a team at this point, you will be assigned a team. 
+## Instructions for using the application
 
-#### Proposal (due 9/18 by end of day) 
-Provide an outline of your project direction and the names of associated team members. 
-The outline should have enough detail so that staff can determine if it meets the minimum expectations, or if it goes too far to be reasonable by the deadline. Please include a general description of a project, and list of key technologies/libraries you plan on using (e.g. React, Three.js, Svelte, TypeScript etc.). Two to four paragraphs should provide enough level of detail. Name the file proposal.md and submit a pull request by Friday, September 18th at 11:59 PM (end of day). *Only one pull request is required per team*.
+1. Open the website and register an account, then sign in.
+2. Create a character, custom enemies, and any items you want to use.
+3. Open the Campaigns page, create a campaign, and add a character.
+4. Add item copies to the character’s inventory and select an equipped item.
+5. Create an encounter by entering its name and selecting an enemy and optional loot.
+6. Under Play Encounter, select an encounter and a character, then use Attack or Defend.
 
-You will be given some class time to work on your proposal, but please plan on reserving additional time outside of class as needed. There are no other scheduled checkpoints for your project besides the final submission. 
+## Technologies used
 
-#### Turning in Your Project
-Submit a second PR on the final project repo to turn in your app and code. Again, only one pull request per team.
+1. React
+2. MongoDB
+3. Express
+4. Vite
 
-Deploy your app, in the form of a webpage, to Glitch/Heroku/Digital Ocean or some other service; it is critical that the application functions correctly wherever you post it.
+## Challenges faced
 
-The README for your second pull request should contain:
+1. Initially, communication between members were awkward (100% online) but we overcame it.
+2. None of us are UI experts so the website may not look that appealing.
+3. Alot the components rely on each other and can't function without each other so we had to figure out the exact relationship between systems and communicate with each other to make sure everything works
+as intended after implementation.
 
-1. A brief description of what you created, and a link to the project itself (two paragraphs of text)
-2. Any additional instructions that might be needed to fully use your project (login information etc.)
-3. An outline of the technologies you used and how you used them.
-4. What challenges you faced in completing the project.
-5. What each group member was responsible for designing / developing.
-6. A link to your project video.
+## Members reponsibilities
 
-Think of 1,3, and 4 in particular in a similar vein to the design / tech achievements for A1—A4… make a case for why what you did was challenging and why your implementation deserves a grade of 100%.
-
-## FAQs
-
-- **Can I use XYZ framework?** You can use any web-based frameworks or tools available, but for your server programming you need to use Node.js. Your client-side scripting language should be either JavaScript or TypeScript. While the course staff is happy to help with frameworks used in the class, we can't guarantee we'll be able to assist you with other frameworks / databases; choose carefully!
+1. **Vu Nguyen**: designed and developed character / item creation and combat
+2. **Wen Chen**: desgined and developed campaign and encounter
+3. **Shubham Kumar**: developed the encounter manager, enemy creation / management, and turn action for combat
