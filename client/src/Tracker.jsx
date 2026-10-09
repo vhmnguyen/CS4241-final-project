@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import CharacterForm, { emptyCharacter } from './CharacterForm'
 import CharacterTable from './CharacterTable'
 import Feedback from './Feedback'
@@ -132,62 +132,12 @@ export default function Tracker({
       })
     }
 
-    if (character.equippedItemId !== null) {
-      const equippedItem = items.filter(
-        (item) => item.id === character.equippedItemId
-      )[0]
-      if (
-        equippedItem.modifierType === 'max_hp' &&
-        equippedItem.modifier !== 0
-      ) {
-        const newHP = Number(character.maxHp) - Number(equippedItem.modifier)
-        if (Number(character.currHp) > newHP) {
-          await mutate(
-            '/update',
-            {
-              ...character,
-              equippedItemId: itemId || null,
-              currHp: String(newHP),
-              maxHp: String(newHP)
-            },
-            "Updated character's stats after unequipping."
-          )
-        } else {
-          await mutate(
-            '/update',
-            {
-              ...character,
-              equippedItemId: itemId || null,
-              maxHp: String(newHP)
-            },
-            "Updated character's stats after unequipping."
-          )
-        }
-      }
-    }
-
-    if (itemId !== '') {
-      const equippedItem = items.filter((item) => item.id === itemId)[0]
-      if (
-        equippedItem.modifierType === 'max_hp' &&
-        equippedItem.modifier !== 0
-      ) {
-        console.log('Test ' + itemId || null)
-        await mutate(
-          '/update',
-          {
-            ...character,
-            equippedItemId: itemId,
-            maxHp: String(character.maxHp + equippedItem.modifier)
-          },
-          "Updated character's stats after equipping."
-        )
-      }
-    }
+    const id = typeof characterId === 'string' ? characterId : characterId.id
+    return mutate('/equip', { id, itemId: itemId || null }, 'equipment updated.')
   }
-
+  
   async function mutate(endpoint, body, message, onSuccess = () => {}) {
-    if (!loaded || retry || !begin('Saving changes...')) return
+    if (!loaded || retry || !begin('Saving changes...'))
 
     try {
       const updated = await api.post(endpoint, body)
@@ -557,3 +507,4 @@ export default function Tracker({
     </>
   )
 }
+
