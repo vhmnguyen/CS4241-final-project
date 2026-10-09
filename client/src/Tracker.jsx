@@ -137,7 +137,7 @@ export default function Tracker({
   }
   
   async function mutate(endpoint, body, message, onSuccess = () => {}) {
-    if (!loaded || retry || !begin('Saving changes...'))
+    if (!loaded || retry || !begin('Saving changes...')) return
 
     try {
       const updated = await api.post(endpoint, body)
