@@ -66,6 +66,7 @@ export default function CampaignManager({
   }
 
   function changeCharacterCurrentHPEncounter(currHp, characterId) {
+    //campaign = campaign.characters.map((entry) => (entry.id === characterId)? {...entry, currHp: currHp} : entry);
     return onChange('/campaigns/character/hp', {
       campaignId: campaign.id,
       characterId,
@@ -392,23 +393,6 @@ export default function CampaignManager({
               )
           ))}
         </select>
-        {(() => {
-          if (!campaign && selectedEncounter !== undefined && encounterCharacterId !== undefined) {
-            console.log("=== Encounter Debug ===", {
-              name: selectedEncounter?.name,
-              localLootTable: selectedEncounter?.lootTableItems,
-              Character: encounterCharacter,
-              Enemy: enemies?.find(
-                  (enemy) => enemy.id === selectedEncounter?.enemyId
-              ),
-              addItem: addInventoryItemEncounter,
-              saveCharacterHpToCampaign: changeCharacterCurrentHPEncounter,
-              campaignId: selected,
-            });
-          }
-
-          return null;
-        })()}
         {!campaign || selectedEncounter === undefined || encounterCharacter === undefined ? (
             <p>Select an encounter and a character to begin encounter</p>
         ) : (

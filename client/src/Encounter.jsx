@@ -7,7 +7,7 @@ export default class Encounter extends React.Component {
         this.state = {
             // this is a list of items
             name: props.name,
-            localLootTable: props.lootTable,
+            localLootTable: props.localLootTable,
             Character : props.Character,
             Enemy: props.Enemy,
             enemyHp: Math.floor((props.Enemy.maxHp - props.Enemy.minHp) * Math.random() + 1) + props.Enemy.minHp,
@@ -70,10 +70,11 @@ export default class Encounter extends React.Component {
                 const equipped = state.Character.inventory.find((item) => {
                     return item.id === state.Character.equippedItemId;
                 }) ?? null;
-                const reduction = equipped => {
-                    return equipped?.modifierType === 'dmg_reduction' && Number.isFinite(equipped.modifier)
-                        ? Math.max(0, equipped.modifier) : 0;
-                };
+                const reduction =
+                    equipped?.modifierType === 'dmg_reduction' &&
+                    Number.isFinite(Number(equipped.modifier))
+                        ? Math.max(0, Number(equipped.modifier))
+                        : 0;
                 const { minDamage, maxDamage } = state.Enemy;
                 const roll = Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
                 const damage = Math.max(0, roll - reduction);
@@ -88,6 +89,7 @@ export default class Encounter extends React.Component {
 
     getDrop = () => {
         const dropped = Math.random() >= 0.3;
+        console.log("Loot: "+this.state.localLootTable);
         if (dropped){
             const randomItem = this.state.localLootTable[Math.floor(Math.random()*this.state.localLootTable.length)];
             this.state.addItem(randomItem, this.state.Character.id);
@@ -112,7 +114,7 @@ export default class Encounter extends React.Component {
             if (!this.enemyDefeated()){
                 await this.attackFromEnemy();
             }else{
-                this.state.saveCharacterToCampaign(this.state.Character.currHp, this.state.campaignId);
+                this.state.saveCharacterHpToCampaign(this.state.Character.currHp, this.state.Character.id);
                 this.getDrop();
             }
         } finally {
@@ -133,11 +135,13 @@ export default class Encounter extends React.Component {
                 <p>HP: {this.state.Character.currHp}/{this.state.Character.baseMaxHp}</p>
                 <button
                     type="button"
-                    onClick={this.turnAction('attack')}
+                    onClick={() => {
+                        this.turnAction('attack')}}
                 >Attack</button>
                 <button
                     type="button"
-                    onClick={this.turnAction('defend')}
+                    onClick={() => {
+                        this.turnAction('defend')}}
                 >Defend</button>
             </article>
         </article>)

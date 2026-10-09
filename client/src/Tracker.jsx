@@ -299,6 +299,7 @@ export default function Tracker({
   async function mutateCampaign(endpoint, body) {
     if (!loaded || retry || !begin('Saving campaign...')) return null
     try {
+      console.log("Hung1")
       const saved = await api.post(endpoint, body)
       setCampaigns((current) =>
         current.some((entry) => entry.id === saved.id)
@@ -306,9 +307,18 @@ export default function Tracker({
           : [...current, saved]
       )
       setStatus('Campaign saved.')
+      console.log("Hung2")
       return saved
     } catch (failure) {
       showError(failure.message)
+      console.error('Campaign request failed:', {
+        endpoint,
+        body,
+        failure,
+        message: failure?.message,
+        status: failure?.status,
+        stack: failure?.stack
+      });
       if (failure.status === 409) {
         try {
           setCampaigns(await api.get('/campaigns'))
@@ -316,6 +326,7 @@ export default function Tracker({
           setRetry(true)
         }
       }
+      console.log("Hung4")
       return null
     } finally {
       finish()

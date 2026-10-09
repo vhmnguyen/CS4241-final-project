@@ -67,16 +67,22 @@ function registerCampaigns(app, db, requireJsonObject) {
 
     app.post('/campaigns/character/hp', requireJsonObject, async (request, response) => {
         const { campaignId, characterId, currHp } = request.body;
-        const campaign = await campaigns.findOne({ id: campaignId });
+        const campaign = await campaigns.findOne({
+            _id: new ObjectId(campaignId)
+        });
         characters = campaign.characters.map(character =>
             character.id === characterId ? { ...character, currHp: currHp } : character
         );
-        if (!campaign) {
-            db.users.replaceOne(
-                { id: campaignId },
+        if (campaign) {
+            const res = await campaigns.replaceOne(
+                { _id: new ObjectId(campaignId) },
                 { ...campaign, characters: characters }
             );
         }
+        response.json({
+            success: true,
+            message: "Character HP updated"
+        });
     })
 
     app.post('/campaigns/join', requireJsonObject, async (request, response) =>
