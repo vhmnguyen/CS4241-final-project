@@ -98,7 +98,23 @@ export default class Encounter extends React.Component {
     }
 
     populateCharacter = (character) => {
-        this.setState({Character: character});
+        if (this.characterInitialization) return this.characterInitialization;
+        if (!character || typeof character !== 'object' || Array.isArray(character)) {
+            throw new TypeError('A character object is required.');
+        }
+
+        const encounterCharacter = structuredClone(character);
+        encounterCharacter.maxHp = encounterCharacter.maxHp ?? encounterCharacter.baseMaxHp;
+        const inventory = Array.isArray(encounterCharacter.inventory) ? encounterCharacter.inventory : [];
+        const equippedItem = inventory.find((item) => item.id === encounterCharacter.equippedItemId);
+
+        this.characterInitialization = new Promise((resolve) => {
+            this.setState({
+                Character: encounterCharacter,
+                LocalEquippedItems: equippedItem ? [equippedItem] : []
+            }, resolve);
+        });
+        return this.characterInitialization;
     }
 
     turnAction = async (action) => {
